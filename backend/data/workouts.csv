@@ -1,0 +1,51 @@
+exercise_name,muscle_group,category,difficulty,equipment,sets,reps,duration_min,calories_burned,workout_type,description
+Push-ups,chest,strength,beginner,none,3,15,10,80,strength,Classic bodyweight chest exercise
+Diamond Push-ups,triceps,strength,intermediate,none,3,12,10,75,strength,Tricep-focused push-up variation
+Wide Push-ups,chest,strength,beginner,none,3,15,10,78,strength,Wider grip for outer chest
+Dumbbell Bench Press,chest,strength,intermediate,dumbbells,4,12,15,120,strength,Primary chest mass builder
+Incline Dumbbell Press,chest,strength,intermediate,dumbbells,3,12,12,110,strength,Upper chest developer
+Pull-ups,back,strength,intermediate,bar,3,8,12,100,strength,Best back bodyweight exercise
+Lat Pulldown,back,strength,intermediate,cable,4,12,15,110,strength,Lat width builder
+Bent Over Rows,back,strength,intermediate,dumbbells,4,12,15,120,strength,Back thickness exercise
+Seated Cable Row,back,strength,intermediate,cable,3,12,12,100,strength,Mid-back developer
+Deadlift,back,strength,advanced,barbell,4,8,20,180,strength,King of all exercises
+Squats,legs,strength,beginner,none,4,15,15,150,strength,Fundamental lower body exercise
+Goblet Squat,legs,strength,beginner,dumbbell,3,15,12,130,strength,Beginner-friendly squat variation
+Lunges,legs,strength,beginner,none,3,12,10,110,strength,Unilateral leg strength
+Leg Press,legs,strength,intermediate,machine,4,15,15,140,strength,Quad-dominant leg press
+Romanian Deadlift,legs,strength,intermediate,dumbbells,3,12,15,130,strength,Hamstring focused exercise
+Calf Raises,calves,strength,beginner,none,4,20,8,60,strength,Calf isolation exercise
+Overhead Press,shoulders,strength,intermediate,dumbbells,4,12,15,110,strength,Shoulder mass builder
+Lateral Raises,shoulders,strength,beginner,dumbbells,3,15,10,80,strength,Side delt developer
+Front Raises,shoulders,strength,beginner,dumbbells,3,12,10,75,strength,Front delt exercise
+Arnold Press,shoulders,strength,intermediate,dumbbells,3,12,15,100,strength,Full shoulder developer
+Bicep Curls,biceps,strength,beginner,dumbbells,3,15,10,80,strength,Classic arm exercise
+Hammer Curls,biceps,strength,beginner,dumbbells,3,12,10,75,strength,Brachialis builder
+Concentration Curls,biceps,strength,beginner,dumbbell,3,12,10,70,strength,Peak bicep exercise
+Tricep Dips,triceps,strength,beginner,bench,3,12,10,85,strength,Bodyweight tricep exercise
+Skull Crushers,triceps,strength,intermediate,dumbbells,3,12,12,90,strength,Tricep mass builder
+Plank,core,strength,beginner,none,3,60,10,50,strength,Core stability exercise
+Crunches,core,strength,beginner,none,3,20,10,55,strength,Abdominal exercise
+Leg Raises,core,strength,beginner,none,3,15,10,60,strength,Lower ab exercise
+Russian Twists,core,strength,beginner,none,3,20,10,65,strength,Oblique exercise
+Mountain Climbers,core,cardio,intermediate,none,3,30,10,80,mixed,Core + cardio combo
+Running (moderate),full_body,cardio,beginner,none,1,1,30,300,cardio,30-min moderate run
+Brisk Walking,full_body,cardio,beginner,none,1,1,45,220,cardio,45-min brisk walk
+Cycling (outdoor),full_body,cardio,beginner,none,1,1,30,280,cardio,30-min cycling
+Jump Rope,full_body,cardio,intermediate,rope,3,2,20,240,cardio,High intensity cardio
+Burpees,full_body,cardio,intermediate,none,3,15,15,200,cardio,Full body conditioning
+High Knees,legs,cardio,beginner,none,3,30,10,120,cardio,Cardio leg exercise
+Jumping Jacks,full_body,cardio,beginner,none,3,30,10,100,cardio,Warm-up cardio exercise
+Box Jumps,legs,cardio,intermediate,box,3,10,12,150,mixed,Explosive plyometric
+HIIT Circuit,full_body,cardio,advanced,none,4,1,25,350,cardio,High intensity interval training
+Swimming,full_body,cardio,intermediate,pool,1,1,30,320,cardio,Full body low impact
+Yoga (Surya Namaskar),full_body,flexibility,beginner,mat,12,1,20,150,mixed,Sun salutation sequence
+Warrior Pose,legs,flexibility,beginner,mat,3,30,10,50,mixed,Standing yoga pose
+Downward Dog,full_body,flexibility,beginner,mat,3,30,10,45,mixed,Classic yoga pose
+Child's Pose,back,flexibility,beginner,mat,3,30,5,30,mixed,Restorative yoga
+Cat-Cow Stretch,back,flexibility,beginner,mat,3,10,8,35,mixed,Spine mobility
+Hip Flexor Stretch,hips,flexibility,beginner,mat,3,30,8,30,mixed,Hip mobility
+Foam Rolling,full_body,recovery,beginner,foam_roller,1,1,15,40,mixed,Muscle recovery
+Face Pulls,shoulders,strength,beginner,cable,3,15,10,70,strength,Rear delt and rotator cuff
+Chest Fly,chest,strength,intermediate,dumbbells,3,12,12,90,strength,Chest isolation
+Seated Row,back,strength,beginner,cable,3,12,12,95,strength,Back pulling exercise
