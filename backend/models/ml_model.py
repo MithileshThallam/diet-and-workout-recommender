@@ -66,11 +66,23 @@ class RecommendationModel:
             "recall": round(recall_score(y_diet_test, y_diet_pred, average='weighted', zero_division=0), 4),
             "f1_score": round(f1_score(y_diet_test, y_diet_pred, average='weighted', zero_division=0), 4)
         }
+        
 
         self.metrics = {
             "workout_model": workout_metrics,
             "diet_model": diet_metrics
         }
+        print("\n===== MODEL EVALUATION METRICS =====")
+
+        print("\n--- Workout Model ---")
+        for k, v in workout_metrics.items():
+           print(f"{k.upper()}: {v}")
+
+        print("\n--- Diet Model ---")
+        for k, v in diet_metrics.items():
+           print(f"{k.upper()}: {v}")
+
+        print("====================================\n")
 
         # Retrain on full dataset for optimal inference performance
         self.workout_model.fit(X, y_workout)
