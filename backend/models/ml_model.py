@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import pickle
 import os
 
@@ -32,22 +33,55 @@ class RecommendationModel:
         return pd.read_csv(data_path)
 
     def train(self):
-        """Train both workout_type and diet_type classifiers"""
+        """Train both workout_type and diet_type classifiers and evaluate them"""
         df = self._load_training_data()
 
         # Features: age, bmi, goal_encoded, activity_encoded
         X = df[["age", "bmi", "goal_encoded", "activity_encoded"]].values
 
-        # --- Workout Type Model ---
         y_workout = self.workout_encoder.fit_transform(df["workout_type"])
-        self.workout_model.fit(X, y_workout)
-
-        # --- Diet Type Model ---
         y_diet = self.diet_encoder.fit_transform(df["diet_type"])
+
+        # Split data for evaluation
+        X_train, X_test, y_workout_train, y_workout_test, y_diet_train, y_diet_test = train_test_split(
+            X, y_workout, y_diet, test_size=0.2, random_state=42
+        )
+
+        # Train and evaluate Workout Type Model
+        self.workout_model.fit(X_train, y_workout_train)
+        y_workout_pred = self.workout_model.predict(X_test)
+        workout_metrics = {
+            "accuracy": round(accuracy_score(y_workout_test, y_workout_pred), 4),
+            "precision": round(precision_score(y_workout_test, y_workout_pred, average='weighted', zero_division=0), 4),
+            "recall": round(recall_score(y_workout_test, y_workout_pred, average='weighted', zero_division=0), 4),
+            "f1_score": round(f1_score(y_workout_test, y_workout_pred, average='weighted', zero_division=0), 4)
+        }
+
+        # Train and evaluate Diet Type Model
+        self.diet_model.fit(X_train, y_diet_train)
+        y_diet_pred = self.diet_model.predict(X_test)
+        diet_metrics = {
+            "accuracy": round(accuracy_score(y_diet_test, y_diet_pred), 4),
+            "precision": round(precision_score(y_diet_test, y_diet_pred, average='weighted', zero_division=0), 4),
+            "recall": round(recall_score(y_diet_test, y_diet_pred, average='weighted', zero_division=0), 4),
+            "f1_score": round(f1_score(y_diet_test, y_diet_pred, average='weighted', zero_division=0), 4)
+        }
+
+        self.metrics = {
+            "workout_model": workout_metrics,
+            "diet_model": diet_metrics
+        }
+
+        # Retrain on full dataset for optimal inference performance
+        self.workout_model.fit(X, y_workout)
         self.diet_model.fit(X, y_diet)
 
         self.is_trained = True
-        return {"status": "trained", "samples": len(df)}
+        return {
+            "status": "trained",
+            "samples": len(df),
+            "metrics": self.metrics
+        }
 
     def predict(self, age: float, bmi: float, goal: str, activity: str) -> dict:
         """

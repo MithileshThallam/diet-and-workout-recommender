@@ -1,147 +1,185 @@
 """
 Diet Recommendation Service
-Loads foods.csv and builds a personalized daily meal plan
-matching the user's calorie target, diet preference, and ML-predicted diet type.
+Builds realistic multi-item meal plans that match daily calorie targets.
 """
 
 import pandas as pd
-import numpy as np
 import os
 import random
 
-# Meal calorie distribution across the day
+# Meal calorie distribution
 MEAL_DISTRIBUTION = {
-    "breakfast": 0.25,   # 25% of daily calories
-    "lunch": 0.35,       # 35% of daily calories
-    "snack": 0.15,       # 15% of daily calories
-    "dinner": 0.25,      # 25% of daily calories
+    "breakfast": 0.25,
+    "lunch": 0.35,
+    "snack": 0.15,
+    "dinner": 0.25,
 }
 
 
+# -------------------------------
+# Load Data
+# -------------------------------
 def load_foods_df() -> pd.DataFrame:
-    """Load and return the foods dataset"""
     base_dir = os.path.dirname(os.path.dirname(__file__))
     path = os.path.join(base_dir, "data", "foods.csv")
-    df = pd.read_csv(path)
-    return df
+    return pd.read_csv(path)
 
 
+# -------------------------------
+# Filter Diet Preference
+# -------------------------------
 def filter_by_preference(df: pd.DataFrame, diet_preference: str) -> pd.DataFrame:
-    """
-    Filter foods based on user's diet preference.
-    'veg' users only see vegetarian options.
-    'non-veg' users see everything.
-    """
     if diet_preference == "veg":
         return df[df["diet_type"] == "veg"].copy()
-    else:
-        # non-veg users get both veg and non-veg options
-        return df.copy()
+    return df.copy()
 
 
-def select_meal(df: pd.DataFrame, meal_type: str,
-                target_calories: float, diet_type: str,
-                seed: int = None) -> dict:
-    """
-    Select the best food item for a given meal slot.
-    Tries to match ML-predicted diet type (high_protein, low_carb, balanced).
-    Falls back gracefully if no close match found.
-    """
+# -------------------------------
+# Select Meal (MULTI-ITEM FIX ✅)
+# -------------------------------
+def select_meal(
+    df: pd.DataFrame,
+    meal_type: str,
+    target_calories: float,
+    diet_type: str,
+    seed: int = None
+) -> dict:
+
     meal_df = df[df["meal_type"] == meal_type].copy()
     if meal_df.empty:
         return None
 
-    # Sort by protein for high_protein, or by calories proximity
+    if seed is not None:
+        random.seed(seed)
+
+    # Shuffle for variety
+    meal_df = meal_df.sample(frac=1, random_state=seed)
+
+    # Sort based on diet type
     if diet_type == "high_protein":
         meal_df = meal_df.sort_values("protein", ascending=False)
     elif diet_type == "low_carb":
         meal_df = meal_df.sort_values("carbs", ascending=True)
-    else:  # balanced
-        meal_df["cal_diff"] = abs(meal_df["calories"] - target_calories)
-        meal_df = meal_df.sort_values("cal_diff")
 
-    # Pick from top 5 for variety (weighted random)
-    top_n = min(5, len(meal_df))
-    if seed is not None:
-        random.seed(seed)
-    chosen = meal_df.iloc[random.randint(0, top_n - 1)]
+    selected_items = []
+    total_cal = 0
+    total_protein = 0
+    total_carbs = 0
+    total_fats = 0
+
+    # Add items until ~target calories reached
+    for _, row in meal_df.iterrows():
+        if total_cal >= target_calories * 0.9:
+            break
+
+        selected_items.append({
+            "food_name": row["food_name"],
+            "calories": int(row["calories"]),
+            "protein_g": float(row["protein"]),
+            "carbs_g": float(row["carbs"]),
+            "fats_g": float(row["fats"]),
+            "category": row["category"]
+        })
+
+        total_cal += row["calories"]
+        total_protein += row["protein"]
+        total_carbs += row["carbs"]
+        total_fats += row["fats"]
 
     return {
-        "food_name": chosen["food_name"],
         "meal_type": meal_type,
-        "calories": int(chosen["calories"]),
-        "protein_g": float(chosen["protein"]),
-        "carbs_g": float(chosen["carbs"]),
-        "fats_g": float(chosen["fats"]),
-        "category": chosen["category"],
-        "diet_type": chosen["diet_type"],
+        "items": selected_items,
+        "meal_calories": round(total_cal),
+        "protein_g": round(total_protein, 1),
+        "carbs_g": round(total_carbs, 1),
+        "fats_g": round(total_fats, 1),
     }
 
 
-def build_meal_plan(target_calories: float, diet_preference: str,
-                    diet_type: str, days: int = 7) -> list:
-    """
-    Build a multi-day meal plan.
-    Each day has: breakfast, lunch, snack, dinner.
-    Total calories per day ≈ target_calories.
-    """
+# -------------------------------
+# Build Meal Plan
+# -------------------------------
+def build_meal_plan(
+    target_calories: float,
+    diet_preference: str,
+    diet_type: str,
+    days: int = 7
+) -> list:
+
     df = load_foods_df()
-    filtered_df = filter_by_preference(df, diet_preference)
+    df = filter_by_preference(df, diet_preference)
 
     meal_plan = []
 
     for day in range(1, days + 1):
         daily_meals = []
         daily_total_cal = 0
+        daily_protein = 0
+        daily_carbs = 0
+        daily_fats = 0
 
-        for meal_type, fraction in MEAL_DISTRIBUTION.items():
-            meal_cal_target = target_calories * fraction
+        for idx, (meal_type, fraction) in enumerate(MEAL_DISTRIBUTION.items()):
+            meal_target = target_calories * fraction
+
             meal = select_meal(
-                filtered_df, meal_type, meal_cal_target,
-                diet_type, seed=day * 100 + list(MEAL_DISTRIBUTION.keys()).index(meal_type)
+                df,
+                meal_type,
+                meal_target,
+                diet_type,
+                seed=day * 100 + idx
             )
+
             if meal:
                 daily_meals.append(meal)
-                daily_total_cal += meal["calories"]
+                daily_total_cal += meal["meal_calories"]
+                daily_protein += meal["protein_g"]
+                daily_carbs += meal["carbs_g"]
+                daily_fats += meal["fats_g"]
 
         meal_plan.append({
             "day": day,
             "meals": daily_meals,
-            "total_calories": daily_total_cal,
+            "total_calories": round(daily_total_cal),
+            "total_protein": round(daily_protein, 1),
+            "total_carbs": round(daily_carbs, 1),
+            "total_fats": round(daily_fats, 1),
         })
 
     return meal_plan
 
 
+# -------------------------------
+# Nutrition Tips
+# -------------------------------
 def get_nutrition_tips(goal: str, bmi_category: str, diet_type: str) -> list:
-    """Generate contextual nutrition tips based on user profile"""
+
     tips = []
 
-    # Universal tips
-    tips.append("Drink at least 8–10 glasses of water daily to stay hydrated and support metabolism.")
-    tips.append("Eat at consistent times each day to regulate your body clock and hunger hormones.")
+    # General
+    tips.append("Drink 8–10 glasses of water daily.")
+    tips.append("Eat meals at consistent times.")
 
-    # BMI-based tips
+    # BMI
     if bmi_category == "Underweight":
-        tips.append("Focus on calorie-dense, nutrient-rich foods like nuts, dairy, and whole grains.")
+        tips.append("Increase calorie intake with nuts, dairy, and healthy fats.")
     elif bmi_category in ["Overweight", "Obese"]:
-        tips.append("Prioritise fibre-rich vegetables and legumes to stay full on fewer calories.")
-        tips.append("Avoid sugary drinks and ultra-processed snacks that spike insulin levels.")
+        tips.append("Focus on high-fiber foods to stay full longer.")
+        tips.append("Avoid sugary drinks and processed foods.")
 
-    # Goal-based tips
+    # Goal
     if goal == "muscle_gain":
-        tips.append("Consume 20–40g of protein within 45 minutes post-workout for optimal muscle synthesis.")
-        tips.append("Spread protein intake evenly across 4–5 meals rather than one large portion.")
+        tips.append("Consume protein after workouts for muscle growth.")
+        tips.append("Eat protein across multiple meals.")
     elif goal == "fat_loss":
-        tips.append("Create a sustainable 300–500 kcal deficit — avoid crash dieting which causes muscle loss.")
-        tips.append("Include high-volume, low-calorie foods (salads, soups) to manage hunger effectively.")
+        tips.append("Maintain a calorie deficit of 300–500 kcal.")
+        tips.append("Use low-calorie high-volume foods like vegetables.")
     else:
-        tips.append("Focus on whole, minimally processed Indian foods for micronutrient density.")
+        tips.append("Maintain a balanced diet with whole foods.")
 
-    # Diet type tips
+    # Diet Type
     if diet_type == "high_protein":
-        tips.append("Include a protein source (dal, paneer, eggs, chicken) in every meal.")
+        tips.append("Include protein in every meal (dal, eggs, paneer, chicken).")
     elif diet_type == "low_carb":
-        tips.append("Replace white rice and maida with brown rice, millets, or cauliflower rice.")
+        tips.append("Replace white rice with millets or brown rice.")
 
-    return tips[:6]  # Return max 6 tips
+    return tips[:6]
